@@ -9,7 +9,11 @@ export class TasksService {
   private tasks: Task[] = [];
 
   getAllTasks(): Task[] {
-    return this.tasks;
+    try {
+      return this.tasks;
+    } catch (err) {
+      throw err;
+    }
   }
 
   getTasksByFilter(filterDto: GetTasksFilterDto): Task[] {
@@ -49,8 +53,8 @@ export class TasksService {
       }
 
       return foundTask;
-    } catch (error) {
-      throw error;
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -73,7 +77,8 @@ export class TasksService {
 
   deleteTaskbyID(id: string): void {
     try {
-      this.tasks = this.tasks.filter((task) => task.id !== id);
+      const foundTask = this.getTaskbyID(id);
+      this.tasks = this.tasks.filter((task) => task.id !== foundTask.id);
     } catch (err) {
       throw err;
     }
