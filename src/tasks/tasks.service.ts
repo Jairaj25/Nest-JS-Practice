@@ -4,18 +4,19 @@ import { TaskStatus } from './tasks-status.enum';
 import { GetTasksFilterDto } from './DTO/get-task-filter.dto';
 import { TaskRepository } from './task.respository';
 import { Task } from './task.entity';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class TasksService {
   constructor(private taskRepository: TaskRepository) {}
 
-  getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
-    return this.taskRepository.getTasks(filterDto);
+  getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
+    return this.taskRepository.getTasks(filterDto, user);
   }
 
-  async getTaskById(id: string): Promise<Task> {
+  async getTaskById(id: string, user: User): Promise<Task> {
     try {
-      const foundTask = await this.taskRepository.findOneBy({ id: id });
+      const foundTask = await this.taskRepository.findOneBy({ id, user });
 
       if (!foundTask) {
         throw new NotFoundException(`Task with ID ${id} not found`);
@@ -27,13 +28,13 @@ export class TasksService {
     }
   }
 
-  createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.taskRepository.createTask(createTaskDto);
+  createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
+    return this.taskRepository.createTask(createTaskDto, user);
   }
 
-  async deleteTaskbyId(id: string): Promise<void> {
+  async deleteTaskbyId(id: string, user: User): Promise<void> {
     try {
-      const DeletedTask = await this.taskRepository.delete({ id: id });
+      const DeletedTask = await this.taskRepository.delete({ id, user });
       if (DeletedTask.affected === 0) {
         throw new NotFoundException(`Task with ID ${id} not found`);
       }
@@ -42,9 +43,9 @@ export class TasksService {
     }
   }
 
-  async updateTask(id: string, status: TaskStatus): Promise<Task> {
+  async updateTask(id: string, status: TaskStatus, user: User): Promise<Task> {
     try {
-      const task = await this.getTaskById(id);
+      const task = await this.getTaskById(id, user);
       task.status = status;
       await this.taskRepository.save(task);
       return task;
